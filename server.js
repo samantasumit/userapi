@@ -1,8 +1,9 @@
 var express = require('express');
+var nodemailer = require('nodemailer');
 var app = express();
 var fs = require("fs");
 var mongoose = require('mongoose');
-var mongoose;
+
 mongoose.connect('mongodb://127.0.0.1:27017/users')
     .then((mongoose) => {
         mongoose = mongoose;
@@ -21,18 +22,6 @@ const UserSchema = mongoose.Schema({
     });
 
 module.exports = mongoose.model('User', UserSchema);
-
-// var MongoClient = require('mongodb').MongoClient
-//     , format = require('util').format;
-// MongoClient.connect('mongodb://127.0.0.1:27017/users', function (err, db) {
-//     if (err) {
-//         throw err;
-//     } else {
-//         console.log("successfully connected to the database");
-
-//     }
-//     db.close();
-// });
 
 app.get('/documentation', (req, res) => {
     res.render('common.jade');
@@ -61,3 +50,26 @@ var server = app.listen(8081, function () {
     // console.log("Example app listening at http://%s:%s", host, port)
 
 })
+
+var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'youremail@gmail.com',
+        pass: 'yourpassword'
+    }
+});
+
+var mailOptions = {
+    from: 'youremail@gmail.com',
+    to: 'sender@gmail.com',
+    subject: 'Sending Email using Node.js',
+    text: 'That was easy!'
+};
+
+// transporter.sendMail(mailOptions, function (error, info) {
+//     if (error) {
+//         console.log(error);
+//     } else {
+//         console.log('Email sent: ' + info.response);
+//     }
+// });
