@@ -53,11 +53,11 @@ app.get('/listUsers', function (req, res) {
 app.post('/addUser', function (req, res) {
     var document = mongoose.models.User(req.body);
     mongoose.models.User.db.collection("users").insertOne(document, function (error, response) {
-        if (err) {
+        if (error) {
             res.status(500).send({
-                message: err.message || "Some error occurred while inserting user."
+                message: error.message || "Some error occurred while inserting user."
             });
-            throw err;
+            throw error;
         }
         res.status(201).send('1 document inserted');
     });
