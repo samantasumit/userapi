@@ -1,3 +1,23 @@
-h3 listUsers
+h3 List Users
 form(action="listUsers", method="get")
-    input(type='submit', value='submit')
+    div.actions
+        input(type='submit', value='get')
+
+h3 Find Users
+form(action="findUsers", method="post")
+    div.input
+        span.label Name
+        input(type='text', name='name', required)
+    div.actions
+        input(type='submit', value='find')
+
+h3 Add User
+form(action="addUser", method="post")
+    div.input
+        span.label Name
+        input(type='text', name='name', required)
+    div.input
+        span.label Age
+        input(type='text', name='age', required)
+    div.actions
+        input(type='submit', value='add')
