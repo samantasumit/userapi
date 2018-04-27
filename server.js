@@ -66,6 +66,18 @@ app.post('/addUser', function (req, res) {
     });
 })
 
+app.put('/removeUser', function (req, res) {
+    var query = { _id: req.body.userId };
+    mongoose.models.User.remove(query)
+        .then(users => {
+            res.status(200).send({ users: users });
+        }).catch(err => {
+            res.status(500).send({
+                message: err.message || "Some error occurred while retrieving users."
+            });
+        });
+})
+
 app.post('/findUsers', function (req, res) {
     var criterion = {
         $or: [{
