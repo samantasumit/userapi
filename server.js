@@ -3,12 +3,15 @@ var nodemailer = require('nodemailer');
 var app = express();
 var fs = require("fs");
 var mongoose = require('mongoose');
+var cors = require('cors');
 var bodyParser = require("body-parser");
 var db;
 
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+
+app.use(require('cors')());
 
 app.use(bodyParser.json());
 
@@ -42,7 +45,7 @@ app.get('/listUsers', function (req, res) {
     // });
     mongoose.models.User.find()
         .then(users => {
-            res.status(201).send(users);
+            res.status(200).send({ users: users });
         }).catch(err => {
             res.status(500).send({
                 message: err.message || "Some error occurred while retrieving users."
@@ -59,15 +62,24 @@ app.post('/addUser', function (req, res) {
             });
             throw error;
         }
-        res.status(201).send('1 document inserted');
+        res.status(200).send({ message: 'Success' });
     });
 })
 
 app.post('/findUsers', function (req, res) {
-    var query = { name: req.body.name };
-    mongoose.models.User.find(query)
+    var criterion = {
+        $or: [{
+            name: {
+                "$regex": req.body.searchInput, "$options": "i"
+            }
+        },
+        {
+            age: { "$regex": req.body.searchInput, "$options": "i" }
+        }]
+    };
+    mongoose.models.User.find(criterion)
         .then(users => {
-            res.status(201).send(users);
+            res.status(200).send({ users: users });
         }).catch(err => {
             res.status(500).send({
                 message: err.message || "Some error occurred while retrieving users."
