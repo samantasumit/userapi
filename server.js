@@ -15,7 +15,7 @@ app.use(require('cors')());
 
 app.use(bodyParser.json());
 
-mongoose.connect('mongodb://127.0.0.1:27017/users')
+mongoose.connect('mongodb://sumit:sumit@ds157475.mlab.com:57475/users')
     .then((mongoose) => {
         db = mongoose;
         console.log("Successfully connected to the database");
@@ -99,7 +99,7 @@ app.post('/findUsers', function (req, res) {
         });
 })
 
-var server = app.listen(8081, function () {
+var server = app.listen(process.env.PORT || 8081, function () {
 
     var host = server.address().address;
     var port = server.address().port;
