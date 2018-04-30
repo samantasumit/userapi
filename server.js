@@ -82,11 +82,15 @@ app.post('/findUsers', function (req, res) {
     var criterion = {
         $or: [{
             name: {
-                "$regex": req.body.searchInput, "$options": "i"
+                "$regex": req.body.searchInput,
+                "$options": "i"
             }
         },
         {
-            age: { "$regex": req.body.searchInput, "$options": "i" }
+            age: {
+                "$regex": req.body.searchInput,
+                "$options": "i"
+            }
         }]
     };
     mongoose.models.User.find(criterion)
