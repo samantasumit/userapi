@@ -20,7 +20,7 @@
         "test": "echo \"Error: no test specified\" && exit 1",
         "execute": "node server.js",
         "open": "http-server -a 'localhost' -p 8081 -o",
-        "start": "npm run open | npm run execute"
+        "start": "node server.js"
     },
     "repository": {
         "type": "git",
