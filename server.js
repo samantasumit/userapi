@@ -15,7 +15,7 @@ app.use(require('cors')());
 
 app.use(bodyParser.json());
 
-mongoose.connect('mongodb://127.0.0.1:27017/users')
+mongoose.connect('mongodb://sumit:sumit@ds157475.mlab.com:57475/users')
     .then((mongoose) => {
         db = mongoose;
         console.log("Successfully connected to the database");
