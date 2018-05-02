@@ -2,10 +2,22 @@ var express = require('express');
 var nodemailer = require('nodemailer');
 var app = express();
 var fs = require("fs");
+var formidable = require('formidable');
 var mongoose = require('mongoose');
 var cors = require('cors');
 var bodyParser = require("body-parser");
+var fetch = require('isomorphic-fetch');
+var Dropbox = require('dropbox').Dropbox;
 var db;
+
+var dropbox = new Dropbox({ accessToken: 'SABgz77iLaAAAAAAAAAAKhFeMEb8fNBSeLDjGm5yEabkihv0ygCa-eBUfI5wvNIp' });
+// dropbox.filesListFolder({ path: '' })
+//     .then(function (response) {
+//         console.log(response);
+//     })
+//     .catch(function (error) {
+//         console.log(error);
+//     });
 
 app.use(bodyParser.urlencoded({
     extended: true
@@ -51,6 +63,49 @@ app.get('/listUsers', function (req, res) {
                 message: err.message || "Some error occurred while retrieving users."
             });
         });
+})
+
+app.post('/uploadFile', function (req, res) {
+    var form = new formidable.IncomingForm();
+    form.parse(req, function (err, fields, files) {
+
+    });
+    form.on('file', function (name, file) {
+        // dropbox.filesUpload({ path: "/" + file.name, contents: fs.createReadStream(file.path), mode: 'overwrite' })
+        dropbox.filesUpload({ path: "/file", contents: fs.createReadStream(file.path), mode: 'overwrite' })
+            .then((response) => {
+                dropbox.sharingCreateSharedLink({ path: "/file", short_url: true })
+                    .then((response) => {
+                        res.status(200).send({ message: 'Success' });
+                    })
+                    .catch((err) => {
+                        res.status(500).send({
+                            message: err.error_summary || "Some error occurred while inserting user."
+                        });
+                    })
+            })
+            .catch((err) => {
+                res.status(500).send({
+                    message: err.error_summary || "Some error occurred while inserting user."
+                });
+            })
+    });
+})
+
+app.get('/downloadFile', function (req, res) {
+
+    dropbox.sharingGetSharedLinks({ path: "/" + "file" })
+        .then((response) => {
+            console.log(response);
+            res.status(200).send({ message: 'Success', file: response.links });
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(500).send({
+                message: err.error_summary || "Some error occurred while inserting user."
+            });
+        })
+
 })
 
 app.post('/addUser', function (req, res) {

@@ -21,3 +21,16 @@ form(action="addUser", method="post")
         input(type='text', name='age', required)
     div.actions
         input(type='submit', value='add')
+
+h3 Upload File
+form(action="uploadFile", method="post", enctype='multipart/form-data')
+    div.input
+        span.label File
+        input(type='file', name='name', required)
+    div.actions
+        input(type='submit', value='Upload')
+
+h3 Download File
+form(action="downloadFile", method="get")
+    div.actions
+        input(type='submit', value='download')
