@@ -71,22 +71,30 @@ app.post('/uploadFile', function (req, res) {
 
     });
     form.on('file', function (name, file) {
-        // dropbox.filesUpload({ path: "/" + file.name, contents: fs.createReadStream(file.path), mode: 'overwrite' })
-        dropbox.filesUpload({ path: "/file", contents: fs.createReadStream(file.path), mode: 'overwrite' })
-            .then((response) => {
-                dropbox.sharingCreateSharedLink({ path: "/file", short_url: true })
+        dropbox.filesCreateFolder({ path: "/" + file.name.substring(0,4), autorename: true })
+            .then((response1) => {
+                // dropbox.filesUpload({ path: "/" + file.name, contents: fs.createReadStream(file.path), mode: 'overwrite' })
+                dropbox.filesUpload({ path: "/" + file.name.substring(0,4) + "/" + file.name, contents: fs.createReadStream(file.path), mode: 'overwrite' })
                     .then((response) => {
-                        res.status(200).send({ message: 'Success' });
+                        dropbox.sharingCreateSharedLink({ path: "/" + file.name.substring(0,4) + "/" +file.name, short_url: true })
+                            .then((response) => {
+                                res.status(200).send({ message: 'Success' });
+                            })
+                            .catch((err) => {
+                                res.status(500).send({
+                                    message: err.error_summary || "Some error occurred while inserting user."
+                                });
+                            })
                     })
                     .catch((err) => {
                         res.status(500).send({
-                            message: err.error_summary || "Some error occurred while inserting user."
+                            message: err || "Some error occurred while inserting user."
                         });
                     })
             })
-            .catch((err) => {
+            .catch((err1) => {
                 res.status(500).send({
-                    message: err.error_summary || "Some error occurred while inserting user."
+                    message: err1 || "Some error occurred while inserting user."
                 });
             })
     });
@@ -94,7 +102,7 @@ app.post('/uploadFile', function (req, res) {
 
 app.get('/downloadFile', function (req, res) {
 
-    dropbox.sharingGetSharedLinks({ path: "/" + "file" })
+    dropbox.sharingGetSharedLinks({ path: "/" + "team/team.png" })
         .then((response) => {
             console.log(response);
             res.status(200).send({ message: 'Success', file: response.links });
@@ -189,3 +197,191 @@ var server = app.listen(process.env.PORT || 8081, function () {
 //         console.log('Email sent: ' + info.response);
 //     }
 // });
+
+
+var htmlPdf = require('html-pdf');
+var nunjucks = require('nunjucks');
+var handlebars = require('handlebars');
+
+var deliveryReport = "";
+deliveryReport += "<html>";
+deliveryReport += "<style>";
+deliveryReport += "    td {";
+deliveryReport += "        white-space: normal;";
+deliveryReport += "        word-wrap: break-word;";
+deliveryReport += "        max-width: 70px;";
+deliveryReport += "        text-align: left;";
+deliveryReport += "        padding-left: 25px;";
+deliveryReport += "    }";
+deliveryReport += "";
+deliveryReport += "    table {";
+deliveryReport += "        white-space: nowrap !important;";
+deliveryReport += "        table-layout: auto;";
+deliveryReport += "    }";
+deliveryReport += "<\/style>";
+deliveryReport += "<meta http-equiv=\"Content-Type\" content=\"text\/html; charset=utf-8\">";
+deliveryReport += "<body>";
+deliveryReport += "<div style=\"padding-left: 25%;\"><img src=\"https:\/\/tookan.s3.amazonaws.com\/task_images\/WbNW1504623499889-2136271926229047427873931130188n.png\"";
+deliveryReport += "        style=\"height:73px; width:310px\"\/><\/div>";
+deliveryReport += "<div style=\"padding-left: 29%;\"  >";
+deliveryReport += "<p>ce@completeshipping.ca<\/p>";
+deliveryReport += "<\/div>";
+deliveryReport += "<div style=\"padding-left: 25%;\" >";
+deliveryReport += "<p>11506 - 38 Street Edmonton, AB T5W 2G7<\/p>";
+deliveryReport += "<\/div>";
+deliveryReport += "<div>";
+deliveryReport += "<table style=\" width:100%\">";
+deliveryReport += "    <tbody >";
+deliveryReport += "    <tr >";
+deliveryReport += "        <td style=\"text-align:justify; width:25%; padding-left:25%\">Date:<\/td>";
+deliveryReport += "        <td style=\"text-align:justify; width:75%; padding-left:5.5%\">{{PickupDateTime}}<\/td>";
+deliveryReport += "    <\/tr>";
+deliveryReport += "    <\/tbody>";
+deliveryReport += "<\/table>";
+deliveryReport += "<\/div>";
+deliveryReport += "<table style=\"padding-left: 25%; width:100%\">";
+deliveryReport += "    <tbody>";
+deliveryReport += "    <tr >";
+deliveryReport += "        <td style=\"padding-left:0;\">Hi<\/td>";
+deliveryReport += "        ";
+deliveryReport += "    <\/tr>";
+deliveryReport += "    <\/tbody>";
+deliveryReport += "    <\/table>";
+deliveryReport += "<table style=\"padding-left: 25%; width:100%\">";
+deliveryReport += "    <tbody>";
+deliveryReport += "    <tr>";
+deliveryReport += "        <td style=\"padding-left:0;\">Complete Express successfully deliveried your items.<\/td>";
+deliveryReport += "        ";
+deliveryReport += "    <\/tr>";
+deliveryReport += "    <\/tbody>";
+deliveryReport += "    <\/table>";
+deliveryReport += "";
+deliveryReport += "<table style=\"width: 100%; padding-top:2%\">";
+deliveryReport += "    <tbody>";
+deliveryReport += "    <tr>";
+deliveryReport += "        <td style=\"text-align:justify\">Way Bill No:<\/td>";
+deliveryReport += "        <td style=\"text-align:justify\">";
+deliveryReport += "            <p>{{DeliveryTaskID}}<\/p>";
+deliveryReport += "        <\/td>";
+deliveryReport += "    <\/tr>";
+deliveryReport += "    <tr>";
+deliveryReport += "        <td style=\"text-align:justify\">Shipper:<\/td>";
+deliveryReport += "        <td style=\"text-align:justify\">";
+deliveryReport += "            <p>{{PickupCustomerName}}<\/p>";
+deliveryReport += "        <\/td>";
+deliveryReport += "    <\/tr>";
+deliveryReport += "    <tr>";
+deliveryReport += "        <td style=\"text-align:justify\">Shipper Address:<\/td>";
+deliveryReport += "        <td style=\"text-align:justify\">";
+deliveryReport += "            <p>{{PickupCustomerAddress}}<\/p>";
+deliveryReport += "        <\/td>";
+deliveryReport += "    <\/tr>";
+deliveryReport += "    <tr>";
+deliveryReport += "        <td style=\"text-align:justify\">Consignee:<\/td>";
+deliveryReport += "        <td style=\"text-align:justify\">";
+deliveryReport += "            <p>{{DeliveryCustomerName}}<\/p>";
+deliveryReport += "        <\/td>";
+deliveryReport += "    <\/tr>";
+deliveryReport += "    <tr>";
+deliveryReport += "        <td style=\"text-align:justify\">Consignee Address:<\/td>";
+deliveryReport += "        <td style=\"text-align:justify\">";
+deliveryReport += "            <p>{{DeliveryCustomerAddress}}<\/p>";
+deliveryReport += "        <\/td>";
+deliveryReport += "    <\/tr>";
+deliveryReport += "    <tr>";
+deliveryReport += "        <td style=\"text-align:justify\">Description:<\/td>";
+deliveryReport += "        <td style=\"text-align:justify\">";
+deliveryReport += "            <p>{{PickupTaskDescription}}<\/p>";
+deliveryReport += "        <\/td>";
+deliveryReport += "    <\/tr>";
+deliveryReport += "    <tr>";
+deliveryReport += "        <td style=\"text-align:justify\">Total Time Taken:<\/td>";
+deliveryReport += "        <td style=\"text-align:justify\">";
+deliveryReport += "            <p>{{TotalTimeTaken}}<\/p>";
+deliveryReport += "        <\/td>";
+deliveryReport += "    <\/tr>";
+deliveryReport += "    <tr>";
+deliveryReport += "        <td style=\"text-align:justify\">Total Distance Travelled:<\/td>";
+deliveryReport += "        <td style=\"text-align:justify\">";
+deliveryReport += "            <p>{{TotalDistanceTravelled}}<\/p>";
+deliveryReport += "        <\/td>";
+deliveryReport += "    <\/tr>";
+deliveryReport += "    <\/tbody>";
+deliveryReport += "<\/table>";
+deliveryReport += "";
+deliveryReport += "<p>&nbsp;<\/p>";
+deliveryReport += "";
+deliveryReport += "<table style=\"width:100%; \">";
+deliveryReport += "    <tbody>";
+deliveryReport += "    <tr>";
+deliveryReport += "        <td>Delivery Chargers:<\/td>";
+deliveryReport += "        <td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;";
+deliveryReport += "            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;";
+deliveryReport += "            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;";
+deliveryReport += "        <\/td>";
+deliveryReport += "    <\/tr>";
+deliveryReport += "    <tr>";
+deliveryReport += "        <td>GST:<\/td>";
+deliveryReport += "        <td>&nbsp;<\/td>";
+deliveryReport += "    <\/tr>";
+deliveryReport += "    <tr>";
+deliveryReport += "        <td>Total Charges:<\/td>";
+deliveryReport += "        <td>&nbsp;<\/td>";
+deliveryReport += "    <\/tr>";
+deliveryReport += "    <\/tbody>";
+deliveryReport += "<\/table>";
+deliveryReport += "";
+deliveryReport += "<table style=\"width:100%;\">";
+deliveryReport += "    <tbody>";
+deliveryReport += "    <tr>";
+deliveryReport += "        <td style=\"width:50%\">Shipper<\/td>";
+deliveryReport += "        <td style=\"padding-left: 1.4%;width:50%\"> <img alt=\"\" src={{PickupSignImage}} style=\"height:60px; width:130px\"\/>";
+deliveryReport += "        <\/td>";
+deliveryReport += "    <\/tr>";
+deliveryReport += "    <tr>";
+deliveryReport += "        <td style=\"width:50%\">Receiver<\/td>";
+deliveryReport += "        <td style=\"padding-left: 1.4%;width:50%\"><img alt=\"\" src={{DeliverySignImage}} style=\"height:60px; width:130px\"\/><\/td>";
+deliveryReport += "    <\/tr>";
+deliveryReport += "    <\/tbody>";
+deliveryReport += "<\/table>";
+deliveryReport += "";
+deliveryReport += "<\/body>";
+deliveryReport += "<\/html>";
+
+var htmlData = {};
+htmlData["PickupDateTime"] = "pickup_job_time";
+htmlData["DeliveryTaskID"] = "delivery_job_id";
+htmlData["PickupCustomerName"] = "pickup_customer_name";
+htmlData["PickupCustomerAddress"] = "pickup_customer_address";
+htmlData["DeliveryCustomerName"] = "delivery_customer_name";
+htmlData["DeliveryCustomerAddress"] = "delivery_customer_address";
+htmlData["PickupTaskDescription"] = "pickup_job_description";
+
+var started_datetime = new Date().getTime();
+var completed_datetime = new Date().getTime();
+
+
+htmlData["TotalTimeTaken"] = "timeDifference";
+htmlData["TotalDistanceTravelled"] = "delivery_total_distance_travelled";
+
+htmlData["PickupSignImage"] = "sd";
+htmlData["DeliverySignImage"] = "sd";
+
+var HTML = handlebars.compile(deliveryReport)(htmlData);
+
+var options = {
+    format: "Letter"
+};
+
+nunjucks.configure(__dirname + '/views');
+var HTML = nunjucks.render('client4.html');
+
+
+htmlPdf.create(HTML, options).toFile("./pdfinvoice/" + "WayBill" + ".pdf", function (error) {
+    if (error) {
+        return;
+    }
+    else {
+        console.log('pdf generated succesfully');
+    }
+});

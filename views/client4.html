@@ -1,0 +1,132 @@
+<html>
+<style>
+    table, th, td {
+        border: 1px solid black;
+    }
+
+    td {
+        /*max-width:150px;
+        text-align:centre;
+        padding:10px;*/
+        white-space: normal;
+        word-wrap: break-word;
+        max-width: 100px;
+        text-align: left;
+        padding-left: 5px;
+    }
+
+    table {
+        white-space: nowrap important;
+        width: 80%
+    }
+
+    p {
+        word-wrap: break-word;
+    }
+</style>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<body class="test">
+<p style="text-align: center; padding-top:5px; "><img
+        src="https://tookan.s3.amazonaws.com/task_images/WbNW1504623499889-2136271926229047427873931130188n.png"
+        style="height:70px; width:250px"/></p>
+<p style="text-align: center;"></p>
+<p style="text-align: center;">11506 - 38 Street Edmonton, AB T5W 2G7</p>
+<div class="col-md-12 col-xs-12" style="padding: 20px">
+    <table align="center">
+        <div class="col-md-12">
+            <tr>
+                <td width="20%">Date:</td>
+                <td width="80%">{{PstartDate}}</td>
+            </tr>
+            <tr>
+                <td>Reference Number:</td>
+                <td>
+                    <p>{{RefrenceNumber}}</p>
+                </td>
+            </tr>
+            <!--<tr>-->
+                <!--<td>Job Identification Number:</td>-->
+                <!--<td width="100px">-->
+                    <!--<p>{{JobIdentificationNumber}}</p>-->
+                <!--</td>-->
+            <!--</tr>-->
+            <tr>
+                <td>Way Bill No:</td>
+                <td width="100px">
+                    <p>{{DTaskID}}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>Driver's Name:</td>
+                <td>
+                    <p>{{DriverName}}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>Shipper:</td>
+                <td>
+                    <p>{{PCustomerName}}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>Shippers Email</td>
+                <td>
+                    <p>{{SEmail}}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>Shipper Address:</td>
+                <td>
+                    <p>{{PCustomerAddress}}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>Consignee:</td>
+                <td>
+                    <p>{{DCustomerName}}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>Consignee Address:</td>
+                <td>
+                    <p>{{DCustomerAddress}}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>Description:</td>
+                <td>
+                    <p>{{PTaskDescription}}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>Shipper Name: </td>
+                <td>
+                    <p>{{ReceiverName}}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>Service Type: </td>
+                <td>
+                    <p>{{ServiceType}}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>Payment Status: </td>
+                <td>
+                    <p>{{PaymentStatus}}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>Shipper: </td>
+                <td>
+                    <img src="{{PSignImage}}" style="height:60px; width:130px"/>                                       
+                        </tab1>
+                </td>
+            </tr>
+        </div>
+    </table>
+</div>
+</body>
+</html>
