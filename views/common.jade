@@ -22,6 +22,14 @@ form(action="addUser", method="post")
     div.actions
         input(type='submit', value='add')
 
+h3 Render HTML
+form(action="postRenderHtml", method="post")
+    div.input
+        span.label Transaction ID
+        input(type='text', name='transactionID', required)
+    div.actions
+        input(type='submit', value='Render')
+
 h3 Upload File
 form(action="uploadFile", method="post", enctype='multipart/form-data')
     div.input

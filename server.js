@@ -377,11 +377,37 @@ nunjucks.configure(__dirname + '/views');
 var HTML = nunjucks.render('client4.html');
 
 
-htmlPdf.create(HTML, options).toFile("./pdfinvoice/" + "WayBill" + ".pdf", function (error) {
-    if (error) {
-        return;
-    }
-    else {
-        console.log('pdf generated succesfully');
-    }
-});
+// htmlPdf.create(HTML, options).toFile("./pdfinvoice/" + "WayBill" + ".pdf", function (error) {
+//     if (error) {
+//         return;
+//     }
+//     else {
+//         console.log('pdf generated succesfully');
+//     }
+// });
+
+app.get('/renderHtml', function (req, res) {
+    res.sendFile(__dirname+'/views/client4.html');
+})
+
+app.post('/postRenderHtml', function (req, res) {
+    var transactionId = req.body.TransactionID;
+    var hmtl = `
+        <!DOCTYPE html>
+        <html>
+        
+        <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+        </head>
+        
+        <body>
+            <form action="https://demo-ipg.comtrust.ae/PaymentEx/MerchantPay/Payment?lang=en&layout=C0STCBLEI" method="post">
+                <input id="TransactionID" type='hidden' name='TransactionID' value=`+ transactionId + ` />
+                <input id="submit" type='submit' value='Submit' />
+            </form>
+        </body>
+        
+        </html>
+    `;
+    res.send(hmtl);
+})
