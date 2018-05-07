@@ -391,7 +391,7 @@ app.get('/renderHtml', function (req, res) {
 })
 
 app.post('/postRenderHtml', function (req, res) {
-    var transactionId = req.body.TransactionID;
+    var transactionId = req.body.transactionID;
     var hmtl = `
         <!DOCTYPE html>
         <html>
