@@ -1,8 +1,7 @@
 var express = require('express');
 var nodemailer = require('nodemailer');
 var app = express();
-var server = require('http').Server(app);
-var io = require('socket.io')(server, { origins: "clientappangular.herokuapp" });
+var io = require('socket.io').listen(app.listen(process.env.PORT || 8081));
 var fs = require("fs");
 var formidable = require('formidable');
 var mongoose = require('mongoose');
@@ -62,11 +61,14 @@ app.get('/documentation', (req, res) => {
     res.render('common.jade');
 });
 
+io.emit('data', "hello");
+
 app.get('/listUsers', function (req, res) {
     // fs.readFile(__dirname + "/" + "users.json", 'utf8', function (err, data) {
     //     // console.log(data);
     //     res.end(data);
     // });
+    
     mongoose.models.User.find()
         .then(users => {
             res.status(200).send({ users: users });
@@ -178,14 +180,14 @@ app.post('/findUsers', function (req, res) {
         });
 })
 
-var server = app.listen(process.env.PORT || 8081, function () {
+// var server = app.listen(process.env.PORT || 8081, function () {
 
-    var host = server.address().address;
-    var port = server.address().port;
+//     var host = server.address().address;
+//     var port = server.address().port;
 
-    // console.log("Example app listening at http://%s:%s", host, port)
+//     // console.log("Example app listening at http://%s:%s", host, port)
 
-})
+// })
 
 // var transporter = nodemailer.createTransport({
 //     service: 'gmail',
