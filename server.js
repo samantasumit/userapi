@@ -15,13 +15,6 @@ var handlebars = require('handlebars');
 var Dropbox = require('dropbox').Dropbox;
 var db;
 
-io.on('connection', function (socket) {
-    socket.emit('news', { hello: 'world' });
-    socket.on('connection', function (data) {
-        console.log(data);
-    });
-});
-
 var dropbox = new Dropbox({ accessToken: 'SABgz77iLaAAAAAAAAAAKhFeMEb8fNBSeLDjGm5yEabkihv0ygCa-eBUfI5wvNIp' });
 // dropbox.filesListFolder({ path: '' })
 //     .then(function (response) {
@@ -38,6 +31,13 @@ app.use(bodyParser.urlencoded({
 app.use(require('cors')());
 
 app.use(bodyParser.json());
+
+io.on('connection', function (socket) {
+    socket.emit('news', { hello: 'world' });
+    socket.on('connection', function (data) {
+        console.log(data);
+    });
+});
 
 mongoose.connect('mongodb://sumit:sumit@ds157475.mlab.com:57475/users')
     .then((mongoose) => {
