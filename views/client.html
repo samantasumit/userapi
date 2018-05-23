@@ -1,5 +1,21 @@
 <html>
 
+<script>
+    $(window).bind('beforeunload', function () {
+        if (/Firefox[\/\s](\d+)/.test(navigator.userAgent) && new Number(RegExp.$1) >= 4) {
+            if (confirm("Are you Sure do you want to leave?")) {
+                history.go();
+            } else {
+                window.setTimeout(function () {
+                    window.stop();
+                }, 1);
+            }
+        } else {
+            return "Are you Sure do you want to leave?";
+        }
+    });
+</script>
+
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <body>

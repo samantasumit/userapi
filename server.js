@@ -1,6 +1,8 @@
 var express = require('express');
 var nodemailer = require('nodemailer');
 var app = express();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
 var fs = require("fs");
 var formidable = require('formidable');
 var mongoose = require('mongoose');
@@ -12,6 +14,13 @@ var nunjucks = require('nunjucks');
 var handlebars = require('handlebars');
 var Dropbox = require('dropbox').Dropbox;
 var db;
+
+io.on('connection', function (socket) {
+    socket.emit('news', { hello: 'world' });
+    socket.on('connection', function (data) {
+        console.log(data);
+    });
+});
 
 var dropbox = new Dropbox({ accessToken: 'SABgz77iLaAAAAAAAAAAKhFeMEb8fNBSeLDjGm5yEabkihv0ygCa-eBUfI5wvNIp' });
 // dropbox.filesListFolder({ path: '' })
@@ -74,12 +83,12 @@ app.post('/uploadFile', function (req, res) {
 
     });
     form.on('file', function (name, file) {
-        dropbox.filesCreateFolder({ path: "/" + file.name.substring(0,4), autorename: true })
+        dropbox.filesCreateFolder({ path: "/" + file.name.substring(0, 4), autorename: true })
             .then((response1) => {
                 // dropbox.filesUpload({ path: "/" + file.name, contents: fs.createReadStream(file.path), mode: 'overwrite' })
-                dropbox.filesUpload({ path: "/" + file.name.substring(0,4) + "/" + file.name, contents: fs.createReadStream(file.path), mode: 'overwrite' })
+                dropbox.filesUpload({ path: "/" + file.name.substring(0, 4) + "/" + file.name, contents: fs.createReadStream(file.path), mode: 'overwrite' })
                     .then((response) => {
-                        dropbox.sharingCreateSharedLink({ path: "/" + file.name.substring(0,4) + "/" +file.name, short_url: true })
+                        dropbox.sharingCreateSharedLink({ path: "/" + file.name.substring(0, 4) + "/" + file.name, short_url: true })
                             .then((response) => {
                                 res.status(200).send({ message: 'Success' });
                             })
@@ -211,7 +220,7 @@ var server = app.listen(process.env.PORT || 8081, function () {
 // });
 
 app.get('/renderHtml', function (req, res) {
-    res.sendFile(__dirname+'/views/client.html');
+    res.sendFile(__dirname + '/views/client.html');
 })
 
 app.post('/postRenderHtml', function (req, res) {
