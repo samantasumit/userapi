@@ -12,6 +12,9 @@ var htmlPdf = require('html-pdf');
 var nunjucks = require('nunjucks');
 var handlebars = require('handlebars');
 var Dropbox = require('dropbox').Dropbox;
+var FileReader = require('filereader');
+var ExifImage = require('exif').ExifImage;
+var jo = require('jpeg-autorotate');
 var db;
 
 var dropbox = new Dropbox({ accessToken: 'SABgz77iLaAAAAAAAAAAKhFeMEb8fNBSeLDjGm5yEabkihv0ygCa-eBUfI5wvNIp' });
@@ -82,35 +85,83 @@ app.get('/listUsers', function (req, res) {
 app.post('/uploadFile', function (req, res) {
     var form = new formidable.IncomingForm();
     form.parse(req, function (err, fields, files) {
-
+       
     });
     form.on('file', function (name, file) {
-        dropbox.filesCreateFolder({ path: "/" + file.name.substring(0, 4), autorename: true })
-            .then((response1) => {
-                // dropbox.filesUpload({ path: "/" + file.name, contents: fs.createReadStream(file.path), mode: 'overwrite' })
-                dropbox.filesUpload({ path: "/" + file.name.substring(0, 4) + "/" + file.name, contents: fs.createReadStream(file.path), mode: 'overwrite' })
-                    .then((response) => {
-                        dropbox.sharingCreateSharedLink({ path: "/" + file.name.substring(0, 4) + "/" + file.name, short_url: true })
-                            .then((response) => {
-                                res.status(200).send({ message: 'Success' });
-                            })
-                            .catch((err) => {
-                                res.status(500).send({
-                                    message: err.error_summary || "Some error occurred while inserting user."
-                                });
-                            })
-                    })
-                    .catch((err) => {
-                        res.status(500).send({
-                            message: err || "Some error occurred while inserting user."
-                        });
-                    })
-            })
-            .catch((err1) => {
-                res.status(500).send({
-                    message: err1 || "Some error occurred while inserting user."
+
+        var reader = new FileReader();
+        reader.onload = function (event) {
+
+            jo.rotate(event.target.result, {}, function(error, buffer, orientation) {
+                if (error) {
+                    console.log('An error occurred when rotating the file: ' + error.message);
+                    fs.writeFile(__dirname + "/tmp/output.jpg", event.target.result, function(err) {
+                        if(err) {
+                            return console.log(err);
+                        }
+                
+                        console.log("The file was saved!");
+                    });
+                    return;
+                }
+                console.log('Orientation was: ' + orientation);
+            
+                // upload the buffer to s3, save to disk or more ...
+              
+                fs.writeFile(__dirname + "/tmp/output.jpg", buffer, function(err) {
+                    if(err) {
+                        return console.log(err);
+                    }
+            
+                    console.log("The file was saved!");
                 });
-            })
+            });
+
+            try {
+                new ExifImage({ image: event.target.result }, function (error, exifData) {
+                    if (error) {
+                        res.status(500).send({
+                            message: error.message || "Some error occurred."
+                        });
+                    }
+                    else {
+                        res.status(200).send({ exifData: exifData });
+                    }
+                });
+            } catch (error) {
+                res.status(500).send({
+                    message: error.message || "Some error occurred."
+                });
+            }
+        }
+        reader.readAsArrayBuffer(file);
+  
+        // dropbox.filesCreateFolder({ path: "/" + file.name.substring(0, 4), autorename: true })
+        //     .then((response1) => {
+        //         // dropbox.filesUpload({ path: "/" + file.name, contents: fs.createReadStream(file.path), mode: 'overwrite' })
+        //         dropbox.filesUpload({ path: "/" + file.name.substring(0, 4) + "/" + file.name, contents: fs.createReadStream(file.path), mode: 'overwrite' })
+        //             .then((response) => {
+        //                 dropbox.sharingCreateSharedLink({ path: "/" + file.name.substring(0, 4) + "/" + file.name, short_url: true })
+        //                     .then((response) => {
+        //                         res.status(200).send({ message: 'Success' });
+        //                     })
+        //                     .catch((err) => {
+        //                         res.status(500).send({
+        //                             message: err.error_summary || "Some error occurred while inserting user."
+        //                         });
+        //                     })
+        //             })
+        //             .catch((err) => {
+        //                 res.status(500).send({
+        //                     message: err || "Some error occurred while inserting user."
+        //                 });
+        //             })
+        //     })
+        //     .catch((err1) => {
+        //         res.status(500).send({
+        //             message: err1 || "Some error occurred while inserting user."
+        //         });
+        //     })
     });
 })
 
