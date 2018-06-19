@@ -1,0 +1,494 @@
+<html>
+
+<head>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"> </script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #fff;
+        }
+
+        .panel {
+            width: 80%;
+            margin: 2em auto;
+        }
+
+        .bootstrap-basic {
+            background: white;
+        }
+
+        .panel-body {
+            width: 90%;
+            margin: 2em auto;
+        }
+
+        #loader {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            z-index: 1001;
+            width: 50px;
+            height: 50px;
+            margin: -25px 0 0 -25px;
+            border: 6px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 6px solid #3498db;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .helper-text {
+            color: #8A6D3B;
+            font-size: 12px;
+            margin-top: 5px;
+            height: 12px;
+            display: block;
+        }
+
+        /* Braintree Hosted Fields styling classes*/
+
+        .braintree-hosted-fields-focused {
+            border: 1px solid #0275d8;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+        }
+
+        .braintree-hosted-fields-focused.focused-invalid {
+            border: 1px solid #ebcccc;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(100, 100, 0, .6);
+        }
+
+        .img-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+        }
+
+        .img-container>img {
+            margin-top: -50%;
+            margin-left: -50%;
+        }
+
+        @media (max-width: 670px) {
+            .form-group {
+                width: 100%;
+            }
+
+            .btn {
+                white-space: normal;
+            }
+        }
+
+        .has-error,
+        .has-error .help-block,
+        .has-error .form-control {
+            border: #a94442 1px solid
+        }
+
+
+        .error_span {
+            color: #a94442;
+            font-size: 12px;
+        }
+
+        .invisible_custom {
+            display: none;
+        }
+
+        .visible_custom {
+            display: block;
+        }
+    </style>
+    <script type="text/javascript">
+
+
+
+        function isNumberKey(evt) {
+            var cardNUmber = $('#card-number');
+            if (cardNUmber.val().length > 16) {
+                return false;
+            }
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode != 46 && charCode > 31
+                && (charCode < 48 || charCode > 57))
+                return false;
+
+            return true;
+        }
+
+        function isNumberKey2(evt) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode != 46 && charCode > 31
+                && (charCode < 48 || charCode > 57))
+                return false;
+
+            return true;
+        }
+
+        function isNumberKey3(evt) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode != 46 && charCode > 31
+                && (charCode < 48 || charCode > 57))
+                return false;
+
+            return true;
+        }
+    </script>
+</head>
+
+<body ng-app="myApp" ng-controller="myCtrl">
+    <div class="panel panel-default bootstrap-basic" id="top">
+        <div class="alert alert-success invisible_custom" id="success-toast">
+            <strong>Success!</strong> You have successfully added the card.
+        </div>
+        <div class="alert alert-danger invisible_custom" id="failure-toast">
+            <strong>Failure!</strong> Error in adding card. Please enter valid card details.
+        </div>
+        <div class="alert alert-danger invisible_custom" id="failure-toast-msg">
+        </div>
+        <div class="panel-heading">
+            <h3 class="panel-title">Enter Card Details</h3>
+        </div>
+        <form style="display: none" class="panel-body" id="payfort-form" name="payfort-form" method="post" action="https://sbcheckout.payfort.com/FortAPI/paymentPage">
+            <input id="service_command" type="hidden" name="service_command" value="TOKENIZATION">
+            <input id="access_code" type="hidden" name="access_code" value="MTxyXt5kSJZH0e7S7EWL">
+            <input id="merchant_identifier" type="hidden" name="merchant_identifier" value="eXpswDIR">
+            <input id="merchant_reference" type="hidden" name="merchant_reference" value="XYZ9239-yu898">
+            <input id="language" type="hidden" name="language" value="en">
+            <input id="expiry_date" type="hidden" name="expiry_date">
+            <input id="card_number" type="hidden" name="card_number">
+            <input id="card_security_code" type="hidden" name="card_security_code">
+            <input id="card_holder_name" type="hidden" name="card_holder_name">
+            <input id="signature" type="hidden" name="signature">
+            <input id="return_url" type="hidden" name="return_url">
+            <input id="submit2" type="submit" value="pay"  name="">
+        </form>
+        <form class="panel-body" id="payment-form">
+            <div class="row">
+
+
+                <div class="form-group col-xs-6">
+                    <label class="control-label">Name on card</label>
+                    <input type="text" class="form-control" id="card-fname" placeholder="Name on card" maxlength="20">
+                </div>
+
+                <div class="form-group col-xs-6" style="padding-right:0px">
+                    <label class="control-label">Card Number</label>
+                    <!-- Hosted Fields div container -->
+                    <input type="text" class="form-control" id="card-number" placeholder="4111 1111 1111 1111" onkeypress="return isNumberKey(event)"
+                        minlength="12" maxlength="19" />
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="form-group col-xs-6">
+
+                    <label class="control-label">CVV</label>
+
+                    <input type="password" class="form-control" id="cvv" placeholder="123" onkeypress="return isNumberKey2(event)" maxlength="4">
+
+                </div>
+                <div class="form-group col-xs-6" style="padding-right:0px">
+                    <div class="row">
+
+                        <label class="control-label col-xs-12">Expiration Date</label>
+                        <div class="col-xs-6">
+                            <!-- Hosted Fields div container -->
+                            <!--<input type="text" class="form-control" id="expiration-month" placeholder="MM" onkeypress="return isNumberKey(event);" maxlength="2">-->
+                            <select class="form-control" id="exp-month" required>
+                                <option disabled value="" selected>Select Month</option>
+                                <option value="01">Jan</option>
+                                <option value="02">Feb</option>
+                                <option value="03">Mar</option>
+                                <option value="04">Apr</option>
+                                <option value="05">May</option>
+                                <option value="06">Jun</option>
+                                <option value="07">Jul</option>
+                                <option value="08">Aug</option>
+                                <option value="09">Sep</option>
+                                <option value="10">Oct</option>
+                                <option value="11">Nov</option>
+                                <option value="12">Dec</option>
+                            </select>
+                        </div>
+                        <div class="col-xs-6">
+                            <select class="form-control" ng-model="expyear" id="exp-year" required>
+                                <option disabled value="" selected>Select Year </option>
+                                <option ng-repeat="year in years track by $index" value="{{year}}">{{year}}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <button value="submit" id="submit" class="btn btn-success btn-lg center-block">Add
+                <span id="card-type">Card</span>
+            </button>
+        </form>
+        <div id="loader"></div>
+    </div>
+    </script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.5/angular.min.js"></script>
+
+    <!-- <script src="payform-validation.js"></script> -->
+    <script>
+        var queryToJson = function (queryString) {
+            var params = {}, queries, temp, i, l;
+            // Split into key/value pairs
+            queries = queryString.split("&");
+            // Convert the array of strings into an object
+            for (i = 0, l = queries.length; i < l; i++) {
+                temp = queries[i].split('=');
+                params[temp[0]] = temp[1];
+            }
+            return params;
+        }
+
+        function SHA256(s) {
+            var chrsz = 8;
+            var hexcase = 0;
+            function safe_add(x, y) {
+                var lsw = (x & 0xFFFF) + (y & 0xFFFF);
+                var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+                return (msw << 16) | (lsw & 0xFFFF);
+            }
+            function S(X, n) { return (X >>> n) | (X << (32 - n)); }
+            function R(X, n) { return (X >>> n); }
+            function Ch(x, y, z) { return ((x & y) ^ ((~x) & z)); }
+            function Maj(x, y, z) { return ((x & y) ^ (x & z) ^ (y & z)); }
+            function Sigma0256(x) { return (S(x, 2) ^ S(x, 13) ^ S(x, 22)); }
+            function Sigma1256(x) { return (S(x, 6) ^ S(x, 11) ^ S(x, 25)); }
+            function Gamma0256(x) { return (S(x, 7) ^ S(x, 18) ^ R(x, 3)); }
+            function Gamma1256(x) { return (S(x, 17) ^ S(x, 19) ^ R(x, 10)); }
+            function core_sha256(m, l) {
+                var K = new Array(0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5, 0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3, 0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174, 0xE49B69C1, 0xEFBE4786, 0xFC19DC6, 0x240CA1CC, 0x2DE92C6F, 0x4A7484AA, 0x5CB0A9DC, 0x76F988DA, 0x983E5152, 0xA831C66D, 0xB00327C8, 0xBF597FC7, 0xC6E00BF3, 0xD5A79147, 0x6CA6351, 0x14292967, 0x27B70A85, 0x2E1B2138, 0x4D2C6DFC, 0x53380D13, 0x650A7354, 0x766A0ABB, 0x81C2C92E, 0x92722C85, 0xA2BFE8A1, 0xA81A664B, 0xC24B8B70, 0xC76C51A3, 0xD192E819, 0xD6990624, 0xF40E3585, 0x106AA070, 0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5, 0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3, 0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2);
+                var HASH = new Array(0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19);
+                var W = new Array(64);
+                var a, b, c, d, e, f, g, h, i, j;
+                var T1, T2;
+                m[l >> 5] |= 0x80 << (24 - l % 32);
+                m[((l + 64 >> 9) << 4) + 15] = l;
+                for (var i = 0; i < m.length; i += 16) {
+                    a = HASH[0];
+                    b = HASH[1];
+                    c = HASH[2];
+                    d = HASH[3];
+                    e = HASH[4];
+                    f = HASH[5];
+                    g = HASH[6];
+                    h = HASH[7];
+                    for (var j = 0; j < 64; j++) {
+                        if (j < 16) W[j] = m[j + i];
+                        else W[j] = safe_add(safe_add(safe_add(Gamma1256(W[j - 2]), W[j - 7]), Gamma0256(W[j - 15])), W[j - 16]);
+                        T1 = safe_add(safe_add(safe_add(safe_add(h, Sigma1256(e)), Ch(e, f, g)), K[j]), W[j]);
+                        T2 = safe_add(Sigma0256(a), Maj(a, b, c));
+                        h = g;
+                        g = f;
+                        f = e;
+                        e = safe_add(d, T1);
+                        d = c;
+                        c = b;
+                        b = a;
+                        a = safe_add(T1, T2);
+                    }
+                    HASH[0] = safe_add(a, HASH[0]);
+                    HASH[1] = safe_add(b, HASH[1]);
+                    HASH[2] = safe_add(c, HASH[2]);
+                    HASH[3] = safe_add(d, HASH[3]);
+                    HASH[4] = safe_add(e, HASH[4]);
+                    HASH[5] = safe_add(f, HASH[5]);
+                    HASH[6] = safe_add(g, HASH[6]);
+                    HASH[7] = safe_add(h, HASH[7]);
+                }
+                return HASH;
+            }
+            function str2binb(str) {
+                var bin = Array();
+                var mask = (1 << chrsz) - 1;
+                for (var i = 0; i < str.length * chrsz; i += chrsz) {
+                    bin[i >> 5] |= (str.charCodeAt(i / chrsz) & mask) << (24 - i % 32);
+                }
+                return bin;
+            }
+            function Utf8Encode(string) {
+                string = string.replace(/\r\n/g, "\n");
+                var utftext = "";
+                for (var n = 0; n < string.length; n++) {
+                    var c = string.charCodeAt(n);
+                    if (c < 128) {
+                        utftext += String.fromCharCode(c);
+                    }
+                    else if ((c > 127) && (c < 2048)) {
+                        utftext += String.fromCharCode((c >> 6) | 192);
+                        utftext += String.fromCharCode((c & 63) | 128);
+                    }
+                    else {
+                        utftext += String.fromCharCode((c >> 12) | 224);
+                        utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+                        utftext += String.fromCharCode((c & 63) | 128);
+                    }
+                }
+                return utftext;
+            }
+            function binb2hex(binarray) {
+                var hex_tab = hexcase ? "0123456789ABCDEF" : "0123456789abcdef";
+                var str = "";
+                for (var i = 0; i < binarray.length * 4; i++) {
+                    str += hex_tab.charAt((binarray[i >> 2] >> ((3 - i % 4) * 8 + 4)) & 0xF) +
+                        hex_tab.charAt((binarray[i >> 2] >> ((3 - i % 4) * 8)) & 0xF);
+                }
+                return str;
+            }
+            s = Utf8Encode(s);
+            return binb2hex(core_sha256(str2binb(s), s.length * chrsz));
+        }
+
+        var app = angular.module('myApp', []);
+        app.controller('myCtrl', ['$scope', '$http', function ($scope, $http) {
+            document.getElementById("loader").style.display = "none";
+            var d = new Date();
+            var n = d.getFullYear();
+            $scope.years = [];
+            $scope.years[0] = n;
+            for (var i = 1; i <= 116; i++) {
+                $scope.years[i] = $scope.years[i - 1] + 1;
+            }
+            function getParameterByName(name, url) {
+                if (!url) {
+                    url = window.location.href;
+                }
+                name = name.replace(/[\[\]]/g, "\\$&");
+                var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                    results = regex.exec(url);
+                if (!results) return null;
+                if (!results[2]) return '';
+                return decodeURIComponent(results[2].replace(/\+/g, " "));
+            }
+
+            var form = $('#payment-form');
+            $('input', form).on('focus', function () {
+                $(this).parent().find('.error_span').remove();
+                $(this).removeClass("has-error");
+            });
+            form.submit(function (event) {
+                var error_message_span = "<span class ='error_span'>* This field is required. </span>"
+                form.find('.submit').prop('disabled', true);
+
+                if ($("#card-number").val() === "") {
+                    if (!$("#card-number").hasClass("has-error")) {
+                        $("#card-number").addClass("has-error");
+                        $("#card-number").parent().append(error_message_span)
+
+                    }
+                }
+
+                if ($("#cvv").val() === "") {
+                    if (!$("#cvv").hasClass("has-error")) {
+                        $("#cvv").addClass("has-error");
+                        $("#cvv").parent().append(error_message_span)
+                    }
+
+                }
+
+                if ($("#exp-month").val() === "") {
+                    if (!$("#exp-month").hasClass("has-error")) {
+                        $("#exp-month").addClass("has-error");
+                        $("#exp-month").parent().append(error_message_span);
+
+                    }
+                }
+
+                if ($("#exp-year").val() === "") {
+                    if (!$("#exp-year").hasClass("has-error")) {
+                        $("#exp-year").addClass("has-error");
+                        $("#exp-year").parent().append(error_message_span);
+                    }
+
+                }
+                if ($("#card-fname").val() === "") {
+                    if (!$("#card-fname").hasClass("has-error")) {
+                        $("#card-fname").addClass("has-error");
+                        $("#card-fname").parent().append(error_message_span);
+                    }
+
+                }
+
+                if ($('#card-number').val() === "" || $('#cvv').val() === "" || $('#exp-month').val() === "" || $('#exp-year').val() === "" || $('#card-fname').val() === "") {
+                    return false;
+                }
+
+
+                else {
+
+                    $('#submit').attr('disabled', true);
+                    var service_command = "TOKENIZATION";
+                    var access_code = "MTxyXt5kSJZH0e7S7EWL";
+                    var merchant_identifier = "eXpswDIR";
+                    var merchant_reference = "XYZ9239-yu898";
+                    var language = "en";
+                    var return_url = "http://localhost:8080/response.html";
+                    var paraphrase = "TESTSHAIN";
+                    var cardnumber = $("#card-number").val();
+                    var cvv = $("#cvv").val();
+                    var expmonth = $('#exp-month').val();
+                    var expyear = $('#exp-year').val();
+                    var cardfname = $("#card-fname").val();
+                    var exp_yr = (parseFloat(parseInt(expyear) % 100).toString()).split('.');
+                    var expiryDate = expmonth + exp_yr[0];
+                    document.getElementById("loader").style.display = "block";
+                    var randomNumber = new Date().getTime().toString();
+                    var signature = SHA256(paraphrase + "access_code=" + access_code + "language=" + language + "merchant_identifier=" + merchant_identifier + "merchant_reference=" + merchant_reference + "return_url=" + return_url + "service_command=" + service_command + paraphrase);
+                    var bodydata = {
+                        service_command: service_command,
+                        access_code: access_code,
+                        merchant_identifier: merchant_identifier,
+                        merchant_reference: merchant_reference,
+                        language: language,
+                        expiry_date: expyear,
+                        card_number: cardnumber,
+                        card_security_code: cvv,
+                        signature: signature
+                    };
+                    console.log(bodydata);
+                    $("#service_command").val(service_command);
+                    $("#access_code").val(access_code);
+                    $("#merchant_identifier").val(merchant_identifier);
+                    $("#merchant_reference").val(merchant_reference);
+                    $("#language").val(language);
+                    $("#expiry_date").val(expyear);
+                    $("#card_number").val(cardnumber);
+                    $("#card_security_code").val(cvv);
+                    $("#card_holder_name").val(cardfname);
+                    $("#signature").val(signature);
+                    $("#return_url").val(return_url);
+                    $("#submit2").click();
+                }
+                return false;
+            });
+        }])
+    </script>
+
+</body>
+
+</html>
