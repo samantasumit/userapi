@@ -37,7 +37,7 @@ app.use(bodyParser.json());
 io.of('/chat').on('connection', function (socket) {
     socket.emit('news', 'Test Connection!');
     socket.on('send', function (data) {
-        socket.emit('news', data);
+        socket.broadcast.emit('news', data);
     });
 });
 
@@ -63,8 +63,6 @@ module.exports = mongoose.model('User', UserSchema);
 app.get('/documentation', (req, res) => {
     res.render('common.jade');
 });
-
-io.emit('data', "hello");
 
 app.get('/listUsers', function (req, res) {
     // fs.readFile(__dirname + "/" + "users.json", 'utf8', function (err, data) {
