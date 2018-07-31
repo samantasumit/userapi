@@ -34,7 +34,7 @@ app.use(require('cors')());
 
 app.use(bodyParser.json());
 
-io.on('connection', function (socket) {
+io.of('/chat').on('connection', function (socket) {
     socket.emit('news', 'Test Connection!');
     socket.on('send', function (data) {
         socket.emit('news', data);
