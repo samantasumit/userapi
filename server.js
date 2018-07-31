@@ -35,9 +35,9 @@ app.use(require('cors')());
 app.use(bodyParser.json());
 
 io.on('connection', function (socket) {
-    socket.emit('news', { hello: 'world' });
-    socket.on('connection', function (data) {
-        console.log(data);
+    socket.emit('news', 'Test Connection!');
+    socket.on('send', function (data) {
+        socket.emit('news', data);
     });
 });
 
