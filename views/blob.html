@@ -1,0 +1,44 @@
+<input id="file" type="file">
+<button onclick="send()">Submit</button>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io-stream/0.9.1/socket.io-stream.js"></script>
+<script>
+
+    function send() {
+        // console.log("sd");
+        //var file = $("#file")[0].files[0];
+        // console.log(file);
+        // socket.emit('filename', file.name);
+        // socket.emit('send', file);
+
+        var file = $("#file")[0].files[0];
+
+        var stream = ss.createStream();
+
+        ss(socket).emit('upload', stream, {
+            name: file.name,
+            size: file.size
+        });
+
+        var blobStream = ss.createBlobReadStream(file);
+        var size = 0;
+        blobStream.on('data', (chunk) => {
+            size += chunk.length;
+
+            console.log('Uploading ' + size + ' / ' + file.size);
+        });
+        blobStream.pipe(stream);
+
+    }
+    var socket = io('http://localhost:8081/chat');
+    socket.on('news', function (data) {
+        console.log(data);
+
+
+    });
+
+
+
+
+</script>

@@ -1,0 +1,302 @@
+<html>
+
+<head>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/12.1.8/css/intlTelInput.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/12.1.8/js/intlTelInput.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/12.1.8/js/utils.js"></script>
+    <style>
+        body {
+            background-color: #fff;
+        }
+
+        .panel {
+            width: 80%;
+            margin: 2em auto;
+        }
+
+        .bootstrap-basic {
+            background: white;
+        }
+
+        .panel-body {
+            width: 90%;
+            margin: 2em auto;
+        }
+
+        .helper-text {
+            color: #8A6D3B;
+            font-size: 12px;
+            margin-top: 5px;
+            height: 12px;
+            display: block;
+        }
+
+        /* Braintree Hosted Fields styling classes*/
+
+        .braintree-hosted-fields-focused {
+            border: 1px solid #0275d8;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+        }
+
+        .braintree-hosted-fields-focused.focused-invalid {
+            border: 1px solid #ebcccc;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(100, 100, 0, .6);
+        }
+
+        .img-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+        }
+
+        .img-container>img {
+            margin-top: -50%;
+            margin-left: -50%;
+        }
+
+        @media (max-width: 670px) {
+            .form-group {
+                width: 100%;
+            }
+
+            .btn {
+                white-space: normal;
+            }
+        }
+
+        .has-error,
+        .has-error .help-block,
+        .has-error .form-control {
+            border: #a94442 1px solid
+        }
+
+        .error_span {
+            color: #a94442;
+            font-size: 12px;
+        }
+
+        .invisible_custom {
+            display: none;
+        }
+
+        .visible_custom {
+            disblay: block;
+        }
+
+        #loader {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            z-index: 1001;
+            width: 50px;
+            height: 50px;
+            margin: -25px 0 0 -25px;
+            border: 6px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 6px solid #3498db;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .intl-tel-input {
+            width: 100% !important;
+        }
+    </style>
+    <script type="text/javascript">
+        function isNumberKey(evt) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode != 46 && charCode > 31
+                && (charCode < 48 || charCode > 57))
+                return false;
+
+            return true;
+        }
+
+        function isNumberKey2(evt) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode != 46 && charCode > 31
+                && (charCode < 48 || charCode > 57))
+                return false;
+
+            return true;
+        }
+
+        function isNumberKey3(evt) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode != 46 && charCode > 31
+                && (charCode < 48 || charCode > 57))
+                return false;
+
+            return true;
+        }
+    </script>
+</head>
+
+<body>
+    <div class="panel panel-default bootstrap-basic" id="top">
+        <div class="alert alert-success invisible_custom" id="success-toast">
+            <strong>Success!</strong> You have successfully added the card.
+        </div>
+        <div class="alert alert-danger invisible_custom" id="failure-toast">
+            <strong>Failure!</strong> Error in adding card. Please enter valid card details.
+        </div>
+        <div class="panel-heading">
+            <h3 class="panel-title">Enter Pay Details</h3>
+        </div>
+        <form class="panel-body" id="payment-form">
+            <div class="row">
+                <div class="form-group col-xs-6">
+                    <label class="control-label">Name</label>
+                    <input type="text" class="form-control" id="name" placeholder="Name" />
+                </div>
+                <div class="form-group col-xs-6">
+                    <label class="control-label">Phone Number</label>
+                    <br>
+                    <input class="form-control" type="tel" id="phone_no" onkeypress="return isNumberKey(event)">
+                    <div class="phoneerror" id="invalid-phone"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-xs-6">
+                    <label class="control-label">Mobile Operator</label>
+                    <select class="form-control" id="operator">
+                        <option disabled selected value="">Select operator</option>
+                        <option value="mtn-gh">MTN-GH</option>
+                        <option value="vodafone-gh">Vodafone-GH</option>
+                        <option value="tigo-gh">Tigo-GH</option>
+                        <option value="airtel-gh">Airtel-GH</option>
+                    </select>
+                </div>
+            </div>
+
+            <button value="submit" id="submit" class="btn btn-success btn-lg center-block">Add Mobile Pay
+            </button>
+        </form>
+        <div id="loader"></div>
+    </div>
+    <script>
+        $("#phone_no").intlTelInput();
+        $("#phone_no").intlTelInput("setCountry", 'gh');
+        document.getElementById("loader").style.display = "none";
+        function getParameterByName(name, url) {
+            if (!url) {
+                url = window.location.href;
+            }
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+
+        var form = $('#payment-form');
+        $('input', form).on('focus', function () {
+            $(this).parent().find('.error_span').remove();
+            $(this).removeClass("has-error");
+        });
+        form.submit(function (event) {
+            var error_message_span = "<span class ='error_span'>* This field is required. </span>";
+            var error_not_valid = "<span class ='error_span'>* Phone Number is not Valid. </span>";
+            form.find('.submit').prop('disabled', true);
+
+            if ($("#name").val() === "") {
+                if (!$("#name").hasClass("has-error")) {
+                    $("#name").addClass("has-error");
+                    $("#name").parent().append(error_message_span);
+                    setTimeout(function () {
+                        $("#name").removeClass("has-error");
+                        $(".error_span").css("display", "none")
+                    }, 3000);
+                }
+            }
+
+            if ($("#operator :selected").text() === "Select operator") {
+                if (!$("#operator").hasClass("has-error")) {
+                    $("#operator").addClass("has-error");
+                    $("#operator").parent().append(error_message_span)
+                    setTimeout(function () {
+                        $("#operator").removeClass("has-error");
+                    }, 3000);
+                }
+            }
+
+
+            var isValid = $("#phone_no").intlTelInput("isValidNumber");
+            if (!isValid) {
+                $("#invalid-phone").html("Phone number is not valid.");
+                $("#invalid-phone").css("display", "block");
+                $("#phone_no").addClass("has-error");
+                setTimeout(function () {
+                    $("#invalid-phone").css("display", "none");
+                    $("#phone_no").removeClass("has-error");
+                }, 3000);
+
+                return false;
+            }
+            if ($('#name').val() === "" || $("#phone_no").val() === "" || $("#operator :selected").text() === "") {
+                return false;
+            }
+            else {
+                document.getElementById("loader").style.display = "block";
+                var name = $("#name").val();
+                var number = $("#phone_no").val();
+                var channel = $("#operator").val();
+                $.ajax({
+                    url: window.location.origin + "/add_merchant_card",
+                    type: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    data: JSON.stringify({
+                        access_token: getParameterByName('access_token'),
+                        app_device_type: getParameterByName('app_device_type'),
+                        card_details: {
+                            name: name,
+                            phone_number: number,
+                            channel: channel
+                        },
+                        payment_method: 64
+                    }),
+                    dataType: "json"
+                }).success(function (data) {
+                    var body = data; //JSON.parse(data);
+                    if (body.status == 200) {
+                        document.getElementById("loader").style.display = "none";
+                        window.location.replace(window.location.origin + "/success.html");
+                    }
+                    else {
+                        document.getElementById("loader").style.display = "none";
+                        window.location.replace(window.location.origin + "/error.html");
+                    }
+                })
+            }
+            // Prevent the form from being submitted:
+            return false;
+        });
+    </script>
+</body>
+
+</html>

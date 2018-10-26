@@ -26,7 +26,9 @@
         "nodemailer": "^4.6.4",
         "nodemon": "^1.17.3",
         "nunjucks": "^3.1.2",
-        "socket.io": "^2.1.1"
+        "path": "^0.12.7",
+        "socket.io": "^2.1.1",
+        "socket.io-stream": "^0.9.1"
     },
     "devDependencies": {},
     "scripts": {

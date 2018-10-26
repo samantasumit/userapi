@@ -1,0 +1,66 @@
+<html ng-app="myApp">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ"
+    crossorigin="anonymous">
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+    crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.5/angular.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/core-min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+    crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+    function getParameterByName(name, url) {
+        if (!url) {
+            url = window.location.href;
+        }
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+</script>
+
+<body ng-controller="myCtrl">
+    <div class="container" style="height: 100%; color: #373a3c;">
+        <div style="display: flex; flex-direction: column; height: 100%;">
+            <div style="margin: auto;">
+                <h6 ng-style="{'color' : status ? 'green' : 'red'}" style="margin: 30px auto; text-align: center;">
+                    {{ message }}
+                </h6>
+                <h5 ng-if="status" style="margin: 30px auto; text-align: center;">
+                    Your transaction ID is {{ transactionId }}
+                </h5>
+                <div style="text-align: center;">
+                    <button ng-click="redirect()" class="btn btn-primary">Continue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var app = angular.module('myApp', []);
+        app.controller('myCtrl', ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
+
+            $scope.message = "";
+            $scope.transactionId = "";
+            $scope.status = false;
+
+            $timeout(function () {
+                console.log(getParameterByName('token'));
+            });
+
+            $scope.redirect = function () {
+                if ($scope.status) {
+                    window.location.replace(window.location.origin + "/success.html");
+                } else {
+                    window.location.replace(window.location.origin + "/error.html");
+                }
+            }
+
+        }]);
+    </script>
+</body>
+
+</html>

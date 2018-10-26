@@ -1,0 +1,163 @@
+<html ng-app="myApp">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ"
+    crossorigin="anonymous">
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+    crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.5/angular.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/core-min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+    crossorigin="anonymous"></script>
+
+
+<body ng-controller="myCtrl">
+    <div class="container" style="height: 100%; color: #373a3c; display: flex; flex-direction: column;">
+        <div ng-if="isStarted" style="display: flex; flex-direction: column; margin: auto;">
+            <div style="margin: 0px auto; display: flex; flex-direction: row;">
+                <div ng-repeat="cell in cells" ng-if="$index < 4" ng-click="selectCell($index)" style="display: flex; height: 100px; width: 100px; border: 1px solid #111; position: relative;">
+                    <h3 style="margin: auto">{{ cell.value }}</h3>
+                    <div ng-if="!((cell.isOpen && cell.isPaired) || cell.isOpen)" style="position: absolute; width: 100%; height: 100%; z-index: 2; background: rgba(236, 48, 48)"></div>
+                    <div ng-if="cell.isOpen && cell.isPaired" style="position: absolute; width: 100%; height: 100%; z-index: 2; background: purple; opacity: 0.3;"></div>
+                </div>
+            </div>
+            <div style="margin: 0px auto; display: flex; flex-direction: row;">
+                <div ng-repeat="cell in cells" ng-if="$index >= 4 && $index < 8" ng-click="selectCell($index)" style="display: flex; height: 100px; width: 100px; border: 1px solid #111; position: relative;">
+                    <h3 style="margin: auto">{{ cell.value }}</h3>
+                    <div ng-if="!((cell.isOpen && cell.isPaired) || cell.isOpen)" style="position: absolute; width: 100%; height: 100%; z-index: 2; background: rgba(236, 48, 48)"></div>
+                    <div ng-if="cell.isOpen && cell.isPaired" style="position: absolute; width: 100%; height: 100%; z-index: 2; background: purple; opacity: 0.3;"></div>
+                </div>
+            </div>
+            <div style="margin: 0px auto; display: flex; flex-direction: row;">
+                <div ng-repeat="cell in cells" ng-if="$index >= 8 && $index < 12" ng-click="selectCell($index)" style="display: flex; height: 100px; width: 100px; border: 1px solid #111; position: relative;">
+                    <h3 style="margin: auto">{{ cell.value }}</h3>
+                    <div ng-if="!((cell.isOpen && cell.isPaired) || cell.isOpen)" style="position: absolute; width: 100%; height: 100%; z-index: 2; background: rgba(236, 48, 48)"></div>
+                    <div ng-if="cell.isOpen && cell.isPaired" style="position: absolute; width: 100%; height: 100%; z-index: 2; background: purple; opacity: 0.3;"></div>
+                </div>
+            </div>
+            <div style="margin: 0px auto; display: flex; flex-direction: row;">
+                <div ng-repeat="cell in cells" ng-if="$index >= 12 && $index < 16" ng-click="selectCell($index)" style="display: flex; height: 100px; width: 100px; border: 1px solid #111; position: relative;">
+                    <h3 style="margin: auto">{{ cell.value }}</h3>
+                    <div ng-if="!((cell.isOpen && cell.isPaired) || cell.isOpen)" style="position: absolute; width: 100%; height: 100%; z-index: 2; background: rgba(236, 48, 48)"></div>
+                    <div ng-if="cell.isOpen && cell.isPaired" style="position: absolute; width: 100%; height: 100%; z-index: 2; background: purple; opacity: 0.3;"></div>
+                </div>
+                <!-- <div style="display: flex; height: 100px; width: 100px; border: 1px solid #111">
+                    <h3 style="margin: auto"></h3>
+                </div> -->
+            </div>
+        </div>
+        <button class="btn btn-primary" ng-click="initialize()" ng-style="{ 'margin-top' : isStarted ? '0px' : 'auto' }" style="width: 100px; margin: auto; margin-top: 0px">
+            {{ isStarted ? 'Reset' : 'Start' }}
+        </button>
+        <div ng-if="isStarted" style="width: 100px; margin: auto; margin-top: 0px; text-align: center;">
+            <span ng-if="isWinner">You won! Total Time:</span> {{ duration }}s
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var app = angular.module('myApp', []);
+        app.controller('myCtrl', ['$scope', '$http', '$timeout', '$interval', function ($scope, $http, $timeout, $interval) {
+
+            var dataSet = [3, 5, 8, 9];
+            $scope.cells = [];
+            var pairingTurnIndex = -1;
+            $scope.duration = 0;
+            var intervalTimer;
+            $scope.isStarted = false;
+            $scope.isWinner = false;
+
+            $scope.initialize = function () {
+                $scope.isWinner = false;
+                dataSet = [3, 5, 8, 9, 1, 6, 7, 4];
+                pairingTurnIndex = -1;
+                $scope.cells = [];
+                $scope.duration = 0;
+                dataSet.forEach((data, index) => {
+                    var cell1 = {
+                        value: data,
+                        isPaired: false,
+                        isOpen: false
+                    };
+                    var cell2 = {
+                        value: data,
+                        isPaired: false,
+                        isOpen: false
+                    };
+                    $scope.cells.push(cell1);
+                    $scope.cells.push(cell2);
+                });
+                shuffle($scope.cells);
+                $scope.isStarted = true;
+                if (intervalTimer) {
+                    $interval.cancel(intervalTimer);
+                }
+                intervalTimer = $interval(() => {
+                    $scope.duration += 1;
+                }, 1000);
+            }
+            function shuffle(array) {
+                var currentIndex = array.length, temporaryValue, randomIndex;
+                while (0 !== currentIndex) {
+                    randomIndex = Math.floor(Math.random() * currentIndex);
+                    currentIndex -= 1;
+                    temporaryValue = array[currentIndex];
+                    array[currentIndex] = array[randomIndex];
+                    array[randomIndex] = temporaryValue;
+                }
+            }
+            function setPairingTurn(id) {
+                if (id < $scope.cells.length) {
+                    $scope.cells[id].isOpen = true;
+                    pairingTurnIndex = id;
+                }
+            }
+            function resetPairingTurn() {
+                pairingTurnIndex = -1;
+            }
+            function getPairingTurn() {
+                return pairingTurnIndex;
+            }
+            function checkPairing(cell, selectedCell) {
+                if (selectedCell.value == cell.value) {
+                    cell.isOpen = true;
+                    cell.isPaired = true;
+                    selectedCell.isOpen = true;
+                    selectedCell.isPaired = true;
+                    resetPairingTurn();
+                } else {
+                    selectedCell.isOpen = false;
+                    selectedCell.isPaired = false;
+                    resetPairingTurn();
+                }
+                $scope.checkWin();
+            }
+            $scope.checkWin = function() {
+                var isComplete = true;
+                $scope.cells.forEach((data) => {
+                    if (!data.isPaired) {
+                        isComplete = false;
+                    }
+                });
+                if (isComplete) {
+                    if (intervalTimer) {
+                        $interval.cancel(intervalTimer);
+                    }
+                    $scope.isWinner = true;
+                }
+            }
+            $scope.selectCell = function (id) {
+                if (id < $scope.cells.length) {
+                    if ($scope.cells[id].isPaired || id == getPairingTurn()) {
+                        return;
+                    }
+                    if (getPairingTurn() != -1) {
+                        checkPairing($scope.cells[id], $scope.cells[getPairingTurn()]);
+                    } else {
+                        setPairingTurn(id);
+                    }
+                }
+            }
+        }]);
+    </script>
+</body>
+
+</html>

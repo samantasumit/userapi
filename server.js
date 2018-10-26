@@ -15,6 +15,8 @@ var Dropbox = require('dropbox').Dropbox;
 var FileReader = require('filereader');
 var ExifImage = require('exif').ExifImage;
 var jo = require('jpeg-autorotate');
+var ss = require('socket.io-stream');
+var path = require('path');
 var db;
 
 var dropbox = new Dropbox({ accessToken: 'SABgz77iLaAAAAAAAAAAKhFeMEb8fNBSeLDjGm5yEabkihv0ygCa-eBUfI5wvNIp' });
@@ -33,13 +35,32 @@ app.use(bodyParser.urlencoded({
 app.use(require('cors')());
 
 app.use(bodyParser.json());
-
+var stream;
 io.of('/chat').on('connection', function (socket) {
+    var filestream = "";
     socket.emit('news', 'Test Connection!');
-    socket.on('send', function (data) {
-        socket.broadcast.emit('news', data);
-    });
+
+    ss(socket).on('upload', (stream, data) => {
+		const filename = path.basename(data.name);
+		const ws = fs.createWriteStream(__dirname + '/tmp/' + `${filename}`);
+		
+		stream.on('error', (e) => {
+			console.log('Error found:');
+			console.log(e);
+		});
+		stream.on('drain', (e) => {
+			console.log('drain');
+		});
+		stream.on('data', () => {
+			console.log('data');
+		});
+		stream.on('close', () => {
+			console.log('close');
+		});
+		stream.pipe(ws);
+	});
 });
+
 
 mongoose.connect('mongodb://sumit:sumit@ds157475.mlab.com:57475/users')
     .then((mongoose) => {
@@ -69,7 +90,7 @@ app.get('/listUsers', function (req, res) {
     //     // console.log(data);
     //     res.end(data);
     // });
-    
+
     mongoose.models.User.find()
         .then(users => {
             res.status(200).send({ users: users });
@@ -83,34 +104,34 @@ app.get('/listUsers', function (req, res) {
 app.post('/uploadFile', function (req, res) {
     var form = new formidable.IncomingForm();
     form.parse(req, function (err, fields, files) {
-       
+
     });
     form.on('file', function (name, file) {
 
         var reader = new FileReader();
         reader.onload = function (event) {
 
-            jo.rotate(event.target.result, {}, function(error, buffer, orientation) {
+            jo.rotate(event.target.result, {}, function (error, buffer, orientation) {
                 if (error) {
                     console.log('An error occurred when rotating the file: ' + error.message);
-                    fs.writeFile(__dirname + "/tmp/output.jpg", event.target.result, function(err) {
-                        if(err) {
+                    fs.writeFile(__dirname + "/tmp/output.jpg", event.target.result, function (err) {
+                        if (err) {
                             return console.log(err);
                         }
-                
+
                         console.log("The file was saved!");
                     });
                     return;
                 }
                 console.log('Orientation was: ' + orientation);
-            
+
                 // upload the buffer to s3, save to disk or more ...
-              
-                fs.writeFile(__dirname + "/tmp/output.jpg", buffer, function(err) {
-                    if(err) {
+
+                fs.writeFile(__dirname + "/tmp/output.jpg", buffer, function (err) {
+                    if (err) {
                         return console.log(err);
                     }
-            
+
                     console.log("The file was saved!");
                 });
             });
@@ -133,7 +154,7 @@ app.post('/uploadFile', function (req, res) {
             }
         }
         reader.readAsArrayBuffer(file);
-  
+
         // dropbox.filesCreateFolder({ path: "/" + file.name.substring(0, 4), autorename: true })
         //     .then((response1) => {
         //         // dropbox.filesUpload({ path: "/" + file.name, contents: fs.createReadStream(file.path), mode: 'overwrite' })

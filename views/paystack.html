@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/12.1.6/css/intlTelInput.css">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/12.1.6/js/intlTelInput.min.js"></script>
+    <style>
+        #payButton {
+position: absolute;
+top: 50%;
+left: 50%;
+}
+
+.paybutton {
+height: 50px;
+width: 50px;
+}
+
+.panel {
+width: 80%;
+margin: 2em auto;
+}
+
+.bootstrap-basic {
+background: white;
+}
+
+#loader {
+position: absolute;
+left: 50%;
+top: 50%;
+z-index: 1001;
+width: 50px;
+height: 50px;
+margin: -25px 0 0 -25px;
+border: 6px solid #f3f3f3;
+border-radius: 50%;
+border-top: 6px solid #3498db;
+-webkit-animation: spin 2s linear infinite;
+animation: spin 2s linear infinite;
+}
+
+.panel-body {
+width: 90%;
+margin: 2em auto;
+}
+
+@-webkit-keyframes spin {
+0% {
+-webkit-transform: rotate(0deg);
+}
+100% {
+-webkit-transform: rotate(360deg);
+}
+}
+
+@keyframes spin {
+0% {
+transform: rotate(0deg);
+}
+100% {
+transform: rotate(360deg);
+}
+}
+.timedifferror {
+color: red;
+font-size: 11px;
+display: none;
+}
+.iti-flag {background-image: url("https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/12.1.6/img/flags.png");}
+
+@media only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (min--moz-device-pixel-ratio: 2), only screen and (-o-min-device-pixel-ratio: 2 / 1), only screen and (min-device-pixel-ratio: 2), only screen and (min-resolution: 192dpi), only screen and (min-resolution: 2dppx) {
+.iti-flag {background-image: url("https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/12.1.6/img/flags@2x.png");}
+}
+.intl-tel-input {
+width:100%;
+}
+</style>
+
+</head>
+<script>
+    function isNumberKey(evt) {
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode != 46 && charCode > 31 &&
+            (charCode < 48 || charCode > 57))
+            return false;
+
+        return true;
+    }
+
+    function getParameterByName(name, url) {
+        if (!url) {
+            url = window.location.href;
+        }
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+</script>
+
+<body ng-app="myApp" ng-controller="myCtrl">
+    <div class="panel panel-default bootstrap-basic" id="top">
+        <div class="panel-heading">
+            <h3 class="panel-title">Enter Card Details</h3>
+        </div>
+        <form class="panel-body" id="payment-form">
+            <div class="col-md-6 col-lg-6 col-sm-12 col-xs-12 form-group">
+                <label class="control-label">Email</label>
+                <input type="email" class="form-control" id="email" ng-model="Email" placeholder="Email">
+                <div class="timedifferror" id="invalid-email"></div>
+            </div>
+            <div class="col-md-6 col-lg-6 col-sm-12 col-xs-12 form-group">
+                <label class="control-label">Phone</label><br>
+                <input type="tel" class="form-control" placeholder="Phone" id="inputPhone" onkeypress="return isNumberKey(event)" />
+                <div class="timedifferror" id="invalid-signup_phone"></div>
+            </div>
+            <button value="submit" id="submit" class="btn btn-success btn-lg center-block">Pay
+            </button>
+        </form>
+
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog" style="height: 100%">
+
+                <div id="loader"></div>
+
+            </div>
+        </div>
+    </div>
+    <script>
+        var app = angular.module('myApp', []);
+        app.controller('myCtrl', function ($scope, $http, $timeout) {
+
+            document.getElementById("loader").style.display = "none";
+            $scope.Email = '';
+            $scope.phone_number = '';
+            $("#inputPhone").intlTelInput({
+                autoPlaceholder: "polite",
+                utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/12.1.6/js/utils.js",
+
+            });
+            $("#inputPhone").intlTelInput("setCountry", "NG");
+            var form = $('#payment-form');
+            $('input', form).on('focus', function () {
+                $(this).parent().find('.error_span').remove();
+                $(this).removeClass("has-error");
+            });
+            form.submit(function (event) {
+                $scope.phone_number = $('#inputPhone').intlTelInput("getNumber");
+                isValid = $("#inputPhone").intlTelInput("isValidNumber");
+
+
+                if ($("#email").val() === "") {
+                    if (!$("#email").hasClass("has-error")) {
+                        $("#email").addClass("has-error");
+                        $("#invalid-email").html("Email is not valid.");
+                        $("#invalid-email").css("display", "block");
+                        $timeout(function () {
+                            $("#invalid-email").css("display", "none");
+                        }, 3000);
+                    }
+
+                }
+
+                if (!isValid) {
+
+                    $scope.showtaskloader = 0;
+                    $("#invalid-signup_phone").html("Phone number is not valid.");
+                    $("#invalid-signup_phone").css("display", "block");
+                    $timeout(function () {
+                        $("#invalid-signup_phone").css("display", "none");
+                    }, 3000);
+
+                    return false;
+                }
+                else {
+                    var handler = PaystackPop.setup({
+                        key: '<%= open_key%>',
+                        email: $scope.Email,
+                        amount: 100,
+                        ref: '' + Math.floor((Math.random() * 1000000000) + 1),
+                        metadata: {
+                            custom_fields: [{
+                                display_name: "Mobile Number",
+                                variable_name: "mobile_number",
+                                value: $scope.phone_number
+                            }]
+                        },
+                        callback: function (response) {
+                            $('#myModal').modal({
+                                backdrop: 'static',
+                                keyboard: false
+                            })
+                            document.getElementById("loader").style.display = "block";
+                            if (response) {
+                                $.ajax({
+                                    url: window.location.origin + "/add_merchant_card",
+                                    type: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json"
+                                    },
+                                    data: JSON.stringify({
+                                        access_token: getParameterByName('access_token'),
+                                        app_device_type: getParameterByName('app_device_type'),
+                                        card_details: {
+                                            reference: response.reference,
+                                            email: $scope.Email
+                                        },
+                                        payment_method: 32
+                                    }),
+                                    dataType: "json"
+                                }).success(function (data) {
+                                    var body = data;
+                                    if (body.status == 200) {
+
+                                        document.getElementById("loader").style.display = "none";
+                                        window.location.replace(window.location.origin + "/success.html");
+
+                                    } else {
+                                        document.getElementById("loader").style.display = "none";
+                                        window.location.replace(window.location.origin + "/error.html");
+                                    }
+                                })
+                                    .error(function () {
+                                        document.getElementById("loader").style.display = "none";
+                                        window.location.replace(window.location.origin + "/error.html");
+                                    })
+                            }
+
+                        },
+                        onClose: function () {
+                        }
+                    });
+                }
+
+                handler.openIframe();
+            })
+        })
+    </script>
+</body>
+
+</html>
